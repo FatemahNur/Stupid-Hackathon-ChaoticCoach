@@ -12,20 +12,31 @@ async function callOpenAI(systemMessage, userPrompt, apiKey) {
       model: MODEL,
       messages: [
         { role: "system", content: systemMessage },
-        { role: "user", content: userPrompt },
+        { role: "user", content: userPrompt }
       ],
-      max_tokens: 250,
+      max_tokens: 200,
       temperature: 0.8,
     }),
   });
 
-  if (!response.ok) {
-    const text = await response.text();
-    throw new Error(`OpenAI error: ${response.status} ${text}`);
+  const data = await response.json();
+
+  // 🔥 FIXED PARSING — handles both content and array-based outputs
+  let text = "";
+
+  try {
+    const msg = data.choices?.[0]?.message;
+    if (typeof msg?.content === "string") {
+      text = msg.content.trim();
+    } else if (Array.isArray(msg?.content)) {
+      // Newer API returns array blocks
+      text = msg.content.map(block => block.text || "").join(" ").trim();
+    }
+  } catch (e) {
+    console.error("Parsing error:", e, "Full response:", data);
   }
 
-  const data = await response.json();
-  return data.choices?.[0]?.message?.content?.trim() || "";
+  return text || "No response generated.";
 }
 
 export default async function handler(req, res) {
@@ -40,15 +51,15 @@ export default async function handler(req, res) {
 
   const apiKey = process.env.OPENAI_API_KEY;
   if (!apiKey) {
-    return res
-      .status(500)
-      .json({ error: "Server misconfigured: OPENAI_API_KEY missing" });
+    return res.status(500).json({
+      error: "Server misconfigured: OPENAI_API_KEY missing",
+    });
   }
 
   const calmSys =
-    "You are a soft, supportive life coach. Give short, practical, kind advice. Stay safe and respectful.";
+    "You are a soft, supportive life coach. Give short, practical, kind advice.";
   const chaosSys =
-    "You are a dramatic but friendly chaos coach. Give short, sarcastic, chaotic advice, but keep it safe, non-harmful, and not hateful.";
+    "You are a dramatic but friendly chaos coach. Give short, sarcastic, chaotic advice, but keep it safe and playful.";
 
   try {
     const [calm, chaos] = await Promise.all([
@@ -58,7 +69,7 @@ export default async function handler(req, res) {
 
     return res.status(200).json({ calm, chaos });
   } catch (err) {
-    console.error("Advise API error:", err);
+    console.error("API error:", err);
     return res.status(500).json({ error: "Server error talking to OpenAI" });
   }
 }
