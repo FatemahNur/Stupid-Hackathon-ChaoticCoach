@@ -1,4 +1,4 @@
-🌀 ChaotiCoach
+### ChaotiCoach
 An AI life coach that gives you calm advice… and chaotic unhinged advice ; at the same time.
 
 ChaotiCoach is a fun, fast, AI-powered web app built for a hackathon.
@@ -11,11 +11,11 @@ Chaos Mode – dramatic, sarcastic, unhinged advice (but still safe & friendly)
 
 Perfect for entertainment, emotional damage, or last-minute life guidance.
 
-Live Demo
+### Live Demo
 (https://stupid-hackathon-chaotic-coach-8h8q-2zxqbs9ny.vercel.app/)
 
 
-Features
+### Features
 
 🧘 Calm Mode: supportive, soft guidance
 
@@ -33,7 +33,7 @@ Features
 
 🛠 Tech Stack
 
-Frontend
+### Frontend
 
 HTML5
 
@@ -41,7 +41,7 @@ TailwindCSS
 
 JavaScript
 
-Backend
+### Backend
 
 Node.js (Runtime: node18)
 
@@ -53,10 +53,11 @@ AI
 
 OpenAI GPT-4o-mini (chat completions)
 
-Tools
+### Tools
 
 GitHub (version control)
 
 Vercel (hosting & deployment)﻿# Stupid-Hackathon-ChaoticCoach
+
 
 
