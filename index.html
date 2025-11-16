@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ChaotiCoach - AI Life Coach</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-gradient-to-br from-purple-600 to-indigo-700 text-white min-h-screen flex items-center justify-center p-6">
+
+  <div class="max-w-2xl w-full bg-white/10 backdrop-blur-lg p-8 rounded-2xl shadow-2xl">
+    <h1 class="text-4xl font-extrabold text-center mb-4">ChaotiCoach</h1>
+    <p class="text-center text-lg mb-6 opacity-80">
+      Get <span class="font-bold">serious</span> advice and <span class="font-bold">chaotic</span> advice at the same time.
+    </p>
+
+    <!-- Input -->
+    <textarea id="userInput" class="w-full p-4 rounded-xl text-black" rows="3" placeholder="What's your problem today?"></textarea>
+
+    <!-- Preset buttons -->
+    <div class="flex flex-wrap gap-2 my-4">
+      <button class="preset bg-white/20 px-3 py-1 rounded-lg">I procrastinated again</button>
+      <button class="preset bg-white/20 px-3 py-1 rounded-lg">My crush left me on read</button>
+      <button class="preset bg-white/20 px-3 py-1 rounded-lg">I ate 4 donuts help</button>
+    </div>
+
+    <button id="adviseBtn" class="w-full bg-yellow-400 hover:bg-yellow-300 text-black font-bold py-3 rounded-xl mt-2">
+      Get Advice
+    </button>
+
+    <!-- Outputs -->
+    <div class="mt-6 grid md:grid-cols-2 gap-4">
+      <div class="bg-white/20 p-4 rounded-xl">
+        <h2 class="text-xl font-bold mb-2">Calm Mode</h2>
+        <p id="calmOutput" class="opacity-90">Waiting...</p>
+      </div>
+
+      <div class="bg-white/20 p-4 rounded-xl">
+        <h2 class="text-xl font-bold mb-2">Chaos Mode</h2>
+        <p id="chaosOutput" class="opacity-90">Waiting...</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- JS -->
+  <script>
+    // Fill preset buttons into textarea
+    document.querySelectorAll(".preset").forEach(btn => {
+      btn.onclick = () => {
+        document.getElementById("userInput").value = btn.innerText;
+      };
+    });
+
+    // MAIN BUTTON
+    document.getElementById("adviseBtn").onclick = async () => {
+      const text = document.getElementById("userInput").value.trim();
+
+      if (!text) {
+        alert("Type something first!");
+        return;
+      }
+
+      document.getElementById("calmOutput").innerText = "Loading...";
+      document.getElementById("chaosOutput").innerText = "Loading...";
+
+      try {
+        const res = await fetch("/api/advise", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ prompt: text })
+        });
+
+        const data = await res.json();
+
+        document.getElementById("calmOutput").innerText = data.calm;
+        document.getElementById("chaosOutput").innerText = data.chaos;
+
+      } catch (err) {
+        document.getElementById("calmOutput").innerText = "Error occurred!";
+        document.getElementById("chaosOutput").innerText = "Error occurred!";
+        console.error(err);
+      }
+    };
+  </script>
+
+</body>
+</html>
