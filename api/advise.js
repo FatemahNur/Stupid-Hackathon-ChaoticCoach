@@ -14,29 +14,28 @@ async function callOpenAI(systemMessage, userPrompt, apiKey) {
         { role: "system", content: systemMessage },
         { role: "user", content: userPrompt }
       ],
-      max_tokens: 200,
-      temperature: 0.8,
-    }),
+      temperature: 0.8
+    })
   });
 
   const data = await response.json();
 
-  // 🔥 FIXED PARSING — handles both content and array-based outputs
-  let text = "";
+  // 🔥 LOG FULL RAW RESPONSE TO VERCEL
+  console.log("RAW OPENAI RESPONSE:", JSON.stringify(data, null, 2));
 
+  // Try all possible shapes:
   try {
-    const msg = data.choices?.[0]?.message;
-    if (typeof msg?.content === "string") {
-      text = msg.content.trim();
-    } else if (Array.isArray(msg?.content)) {
-      // Newer API returns array blocks
-      text = msg.content.map(block => block.text || "").join(" ").trim();
+    if (data.choices?.[0]?.message?.content) {
+      return data.choices[0].message.content;
     }
-  } catch (e) {
-    console.error("Parsing error:", e, "Full response:", data);
+    if (Array.isArray(data.choices?.[0]?.message?.content)) {
+      return data.choices[0].message.content.map(block => block.text || "").join(" ");
+    }
+  } catch (err) {
+    console.log("Parsing error:", err);
   }
 
-  return text || "No response generated.";
+  return "NO CONTENT FOUND";
 }
 
 export default async function handler(req, res) {
@@ -45,31 +44,23 @@ export default async function handler(req, res) {
   }
 
   const { prompt: userPrompt } = req.body || {};
-  if (!userPrompt) {
-    return res.status(400).json({ error: "Missing prompt" });
-  }
 
   const apiKey = process.env.OPENAI_API_KEY;
-  if (!apiKey) {
-    return res.status(500).json({
-      error: "Server misconfigured: OPENAI_API_KEY missing",
-    });
-  }
-
-  const calmSys =
-    "You are a soft, supportive life coach. Give short, practical, kind advice.";
-  const chaosSys =
-    "You are a dramatic but friendly chaos coach. Give short, sarcastic, chaotic advice, but keep it safe and playful.";
+  if (!apiKey) return res.status(500).json({ error: "Missing API key" });
 
   try {
+    const calmSys = "Give soft, helpful, therapist-like advice.";
+    const chaosSys = "Give dramatic, chaotic, sarcastic advice but SAFE and friendly.";
+
     const [calm, chaos] = await Promise.all([
       callOpenAI(calmSys, userPrompt, apiKey),
-      callOpenAI(chaosSys, userPrompt, apiKey),
+      callOpenAI(chaosSys, userPrompt, apiKey)
     ]);
 
     return res.status(200).json({ calm, chaos });
+
   } catch (err) {
-    console.error("API error:", err);
-    return res.status(500).json({ error: "Server error talking to OpenAI" });
+    console.error("SERVER ERROR:", err);
+    return res.status(500).json({ error: "Server error" });
   }
 }
