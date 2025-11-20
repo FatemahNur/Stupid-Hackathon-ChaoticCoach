@@ -12,7 +12,7 @@ Chaos Mode – dramatic, sarcastic, unhinged advice (but still safe & friendly)
 Perfect for entertainment, emotional damage, or last-minute life guidance.
 
 ### Live Demo
-
+https://stupid-hackathon-chaotic-coach-8h8q-b89hcyon6.vercel.app/
 
 
 ### Features
@@ -58,6 +58,7 @@ OpenAI GPT-4o-mini (chat completions)
 GitHub (version control)
 
 Vercel (hosting & deployment)﻿# Stupid-Hackathon-ChaoticCoach
+
 
 
 
